@@ -1,0 +1,50 @@
+
+services:
+
+  nginx:
+    build: ./requirements/nginx
+    ports:
+      - 443:443
+    networks:
+      - inception_net
+    volumes:
+      - wp_volume:/var/www/html
+    env_file: ./secrets/.env
+    restart: on-failure
+    depends_on:
+      - wordpress
+
+    wordpress:
+      build: ./requirements/wordpress
+      networks:
+        - inception_net
+      volumes:
+        - wp_volume:/var/www/html
+      env_file: ./secrets/.env
+      restart: on-failure
+      depends_on:
+        - mariadb
+
+    mariadb:
+      build: ./requirements/mariadb
+      networks:
+        - inception_net
+      volumes:
+        - db_volume:/var/lib/mysql
+      secrets:
+        - db_root_password
+      env_file: ./secrets/.env
+      restart: on-failure
+
+volumes:
+  wp_volume:
+  db_volume:
+
+networks:
+  inception_net:
+    driver: bridge
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+
