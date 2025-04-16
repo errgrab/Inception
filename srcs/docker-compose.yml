@@ -1,50 +1,54 @@
 services:
   nginx:
     build: ./requirements/nginx
+    container_name: nginx
+    restart: always
     ports:
       - 443:443
     networks:
-      - inception_net
-    volumes:
-      - wp_data:/var/www/html
-    depends_on:
-      - wordpress
-    restart: always
+      - inception
+    env_file:
+      - .env
 
   wordpress:
     build: ./requirements/wordpress
-    networks:
-      - inception_net
-    volumes:
-      - wp_data:/var/www/html
-    env_file: .env
-    depends_on:
-      - mariadb
+    container_name: wordpress
     restart: always
+    secrets:
+      - wp_admin_pass
+      - db_pass
+    volumes:
+      - wp_site:/var/www/html
+    networks:
+      - inception
+    env_file:
+      - .env
 
   mariadb:
     build: ./requirements/mariadb
-    networks:
-      - inception_net
-    volumes:
-      - db_data:/var/lib/mysql
-    env_file: .env
+    container_name: mariadb
     restart: always
+    secrets:
+      - db_root_pass
+    volumes:
+      - wp_db:/var/lib/mysql
+    networks:
+      - inception
+    env_file:
+      - .env
 
-networks:
-  inception_net:
-    driver: bridge
+secrets:
+  wp_admin_pass:
+    file: ../secrets/wp_admin_pass.txt
+  db_pass:
+    file: ../secrets/db_pass.txt
+  db_root_pass:
+    file: ../secrets/db_root_pass.txt
 
 volumes:
-  wp_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: data/wp
-  db_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: data/db
+  wp_site:
+  wp_db:
+
+networks:
+  inception:
+    driver: bridge

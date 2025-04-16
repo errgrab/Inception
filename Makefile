@@ -1,25 +1,18 @@
-DOCKER_COMPOSE = srcs/docker-compose.yml
-
-.PHONY: all up down clean fclean re
+.PHONY: up down build clean fclean re
 
 all: up
 
 up:
-	mkdir -p data/wp
-	mkdir -p data/db
-	docker-compose -f $(DOCKER_COMPOSE) up -d --build
-
-
+	cd srcs && docker-compose up -d --build
 
 down:
-	docker-compose -f $(DOCKER_COMPOSE) down
+	cd srcs && docker-compose down
 
-clean: down
-	docker system prune -a
+clean:
+	cd srcs && docker-compose down -v
 
 fclean: clean
-	docker volume rm $$(docker volume ls -q)
-	sudo rm -rf data/wp/*
-	sudo rm -rf data/db/*
+	cd srcs && docker-compose rm -f
+	docker system prune -a
 
-re: fclean all
+re: clean up
