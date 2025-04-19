@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DB_ROOT_PASS=$(cat /run/secrets/db_root_pass)
+DB_ROOT_PASS=$(cat /run/secrets/dbrootpass)
 
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld

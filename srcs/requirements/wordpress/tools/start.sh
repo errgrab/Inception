@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-WP_ADMIN_PASS=$(cat /run/secrets/wp_admin_pass)
-WP_DB_PASS=$(cat /run/secrets/db_pass)
+WP_ADMIN_PASS=$(cat /run/secrets/wpadmin)
+WP_DB_PASS=$(cat /run/secrets/dbpass)
 
 echo "Waiting for MariaDB to be ready..."
 until mysqladmin ping -h"$WP_DB_HOST" --silent; do
