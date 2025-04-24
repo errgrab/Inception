@@ -1,16 +1,19 @@
 #!/bin/bash
 set -e
 
-WP_ADMIN_PASS=$(cat /run/secrets/wpadmin)
-WP_DB_PASS=$(cat /run/secrets/dbpass)
+WP_ADMIN_PASS=$(</run/secrets/wpadmin)
+WP_DB_PASS=$(</run/secrets/dbpass)
 
-echo "Waiting for MariaDB to be ready..."
-until mysqladmin ping -h"$WP_DB_HOST" --silent; do
-	sleep 1
-done
-echo "MariaDB is ready."
+#echo "Waiting for MariaDB to be ready..."
+#until mysqladmin ping -h"$WP_DB_HOST" --silent; do
+#	sleep 1
+#done
+#echo "MariaDB is ready."
 
-if [ ! -f wp-config.php ]; then
+if [ -f ./wp-config.php ]; then
+then
+	echo "Wordpress already Downloaded!"
+else
 	echo "Downloading WordPress..."
 	wp core download --allow-root
 

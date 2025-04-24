@@ -1,12 +1,12 @@
 FROM alpine:3.20
 
-RUN apk update && apk add --no-cache mariadb mariadb-openrc su-exec
+RUN apk update && apk add --no-cache mariadb mariadb-client tini su-exec \
+	&& mkdir /run/mysqld && chown mysql:mysql -R /run/mysqld
 
-COPY ./tools/start.sh /start.sh
-RUN chmod +x /start.sh
-
-VOLUME /var/lib/mysql
+COPY tools/start.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE 3306
 
-CMD ["/start.sh"]
+ENTRYPOINT ["tini","--","/usr/local/bin/start.sh"]
+CMD ["mysqld"]

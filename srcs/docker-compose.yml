@@ -2,9 +2,11 @@ services:
   nginx:
     build: ./requirements/nginx
     container_name: nginx
-    restart: always
+#    restart: always
     ports:
       - 443:443
+    volumes:
+      - wp_site:/var/www/html
     networks:
       - inception
     env_file:
@@ -13,7 +15,7 @@ services:
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
-    restart: always
+#    restart: always
     secrets:
       - wpadmin
       - dbpass
@@ -27,7 +29,7 @@ services:
   mariadb:
     build: ./requirements/mariadb
     container_name: mariadb
-    restart: always
+#    restart: always
     secrets:
       - dbrootpass
     volumes:
