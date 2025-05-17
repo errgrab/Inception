@@ -1,34 +1,35 @@
 #!/bin/sh
 set -e
 
-DB_ROOT_PASS=$(cat /run/secrets/dbrootpass)
-WP_DB_PASS=$(cat /run/secrets/dbpass)
-
-echo root pass: $DB_ROOT_PASS db pass: $WP_DB_PASS
-
-chown -R mysql:mysql /run/mysqld /var/lib/mysql
+#	su-exec mysql mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+#	su-exec mysql mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
 
 if [ ! -d "/var/lib/mysql/mysql" ]; then
-	echo "Initialising fresh MariaDB"
+	echo "Initialising MariaDB"
 
-	su-exec mysql mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+	DB_ROOT_PASS=$(cat /run/secrets/dbrootpass)
+	WP_DB_PASS=$(cat /run/secrets/dbpass)
 
-	su-exec mysql mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
+	mariadbd --initialize-insecure --datadir=/var/lib/mysql
+	mariadbd --datadir=/var/lib/mysql --skip-networking --socket=/tmp/mysql.sock &
 	pid="$!"
-	sleep 5
+	
+	until mysqladmin ping --socket=/tmp/mysql.sock --silent; do
+		sleep 1
+	done
 
-	mysql -u root <<-EOSQL
-		ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASS';
-		CREATE DATABASE IF NOT EXISTS \`$WP_DB_NAME\`;
-		CREATE USER IF NOT EXISTS '$WP_DB_USER'@'%' IDENTIFIED BY '$WP_DB_PASS';
-		GRANT ALL PRIVILEGES ON \`$WP_DB_NAME\`.* TO '$WP_DB_USER'@'%';
-		FLUSH PRIVILEGES;
+	mysql -u root --socket=/tmp/mysql.sock <<-EOSQL
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASS';
+CREATE DATABASE IF NOT EXISTS \`$WP_DB_NAME\`;
+CREATE USER IF NOT EXISTS '$WP_DB_USER'@'%' IDENTIFIED BY '$WP_DB_PASS';
+GRANT ALL PRIVILEGES ON \`$WP_DB_NAME\`.* TO '$WP_DB_USER'@'%';
+FLUSH PRIVILEGES;
+
 EOSQL
 
 	kill "$pid"
-	wait "$pid"
 fi
 
-echo "bind-address=0.0.0.0" > /etc/my.cnf.d/mariadb-server.cnf
-
-exec su-exec mysql mysqld
+#exec su-exec mysql mariadbd
+exec mariadbd --datadir=/var/lib/mysql --bind-address=0.0.0.0

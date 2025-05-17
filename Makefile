@@ -3,6 +3,7 @@
 all: up
 
 up:
+	mkdir -p /home/ecarvalh/data
 	cd srcs && docker-compose up -d --build
 
 down:

@@ -2,12 +2,13 @@ services:
   nginx:
     build: ./requirements/nginx
     image: nginx
+    pull_policy: never
     container_name: nginx
     restart: always
     ports:
       - 443:443
     volumes:
-      - wp_site:/var/www/html
+      - /home/ecarvalh/data/wordpress:/var/www/html
     networks:
       - inception
     env_file:
@@ -16,13 +17,14 @@ services:
   wordpress:
     build: ./requirements/wordpress
     image: wordpress
+    pull_policy: never
     container_name: wordpress
     restart: always
     secrets:
       - wpadmin
       - dbpass
     volumes:
-      - wp_site:/var/www/html
+      - /home/ecarvalh/data/wordpress:/var/www/html
     networks:
       - inception
     env_file:
@@ -31,6 +33,7 @@ services:
   mariadb:
     build: ./requirements/mariadb
     image: mariadb
+    pull_policy: never
     container_name: mariadb
     restart: always
     secrets:
@@ -38,7 +41,7 @@ services:
       - dbpass
       - dbrootpass
     volumes:
-      - wp_db:/var/lib/mysql
+      - /home/ecarvalh/data/mariadb:/var/lib/mysql
     networks:
       - inception
     env_file:
@@ -51,10 +54,6 @@ secrets:
     file: ../secrets/db_password.txt
   dbrootpass:
     file: ../secrets/db_root_password.txt
-
-volumes:
-  wp_site:
-  wp_db:
 
 networks:
   inception:
