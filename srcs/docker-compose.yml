@@ -23,6 +23,7 @@ services:
     secrets:
       - wpadmin
       - dbpass
+      - wpuser
     volumes:
       - wp-data:/var/www/html
     networks:
@@ -64,8 +65,10 @@ volumes:
       o: bind
 
 secrets:
-  wpadmin:
+  wpuser:
     file: ../secrets/credentials.txt
+  wpadmin:
+    file: ../secrets/admin.txt
   dbpass:
     file: ../secrets/db_password.txt
   dbrootpass:

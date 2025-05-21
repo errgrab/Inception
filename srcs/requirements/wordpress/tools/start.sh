@@ -3,6 +3,7 @@ set -e
 
 WP_ADMIN_PASS=$(</run/secrets/wpadmin)
 WP_DB_PASS=$(</run/secrets/dbpass)
+WP_USER_PASS=$(</run/secrets/wpuser)
 
 echo "Waiting for MariaDB to be ready..."
 until mysqladmin ping -h"$WP_DB_HOST" -u"$WP_DB_USER" -p"$WP_DB_PASS" --silent; do
@@ -28,6 +29,10 @@ if [ ! -f wp-config.php ]; then
 		--admin_user="$WP_ADMIN_USER" \
 		--admin_password="$WP_ADMIN_PASS" \
 		--admin_email="$WP_ADMIN_EMAIL"
+
+	wp user create --allow-root \
+		"$WP_USER" "$WP_EMAIL" \
+		--user_pass="$WP_USER_PASS"
 
 	echo "WordPress installed!"
 else
